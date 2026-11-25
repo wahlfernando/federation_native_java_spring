@@ -1,0 +1,15 @@
+{
+  "name": "mfe1",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "devDependencies": {
+    "@softarc/native-federation": "^4.10.2",
+    "@softarc/native-federation-esbuild": "^4.4.0",
+    "esbuild": "^0.28.2",
+    "typescript": "^6.0.3"
+  }
+}

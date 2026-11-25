@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Host Spring + Native Federation</title>
+  <script type="application/json" id="mfe-manifest">
+    { "mfe1": "/mfe1/remoteEntry.json" }
+  </script>
+  <script>
+    window.addEventListener('mfe-loader-available', e => {
+      e.detail.loadRemoteModule('mfe1', './component');
+    }, { once: true });
+  </script>
+  <script src="/js/orchestrator-quickstart.js"></script>
+</head>
+<body>
+  <h1>Pagina executada pelo Spring Boot</h1>
+  <p>Abaixo deve aparecer o componente carregado do micro frontend:</p>
+  <meu-componente></meu-componente>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "$version": "v4",
+  "name": "mfe1",
+  "shared": [],
+  "exposes": [
+    {
+      "key": "./component",
+      "outFileName": "component-GNMOSXW3.js"
+    }
+  ]
+}

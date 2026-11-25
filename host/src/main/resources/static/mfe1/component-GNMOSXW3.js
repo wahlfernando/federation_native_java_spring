@@ -1,0 +1,1 @@
+var e = class extends HTMLElement { async connectedCallback() { this.innerHTML = "<p>Carregando...</p>"; try { let a = await (await fetch("/api/hello")).json(); this.innerHTML = `<p style="color:green">Micro frontend: ${a.mensagem}</p>` } catch (n) { this.innerHTML = `<p style="color:red">Erro ao chamar a API: ${n}</p>` } } }; customElements.define("meu-componente", e);
