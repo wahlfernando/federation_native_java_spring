@@ -1,0 +1,119 @@
+# 🧩 Estudo: Micro Frontends com Native Federation + Spring Boot
+
+> **Projeto de estudo** criado para conhecer e experimentar a arquitetura de **Micro Frontends** usando **Native Federation** com **esbuild**, integrada a um backend **Java / Spring Boot**.
+>
+> Não é um projeto de produção: o objetivo é entender os conceitos, o fluxo de carregamento e como as peças se conectam.
+
+---
+
+## 📚 Sobre o projeto
+
+Em aplicações grandes, vários times costumam trabalhar no mesmo frontend, o que gera acoplamento, deploys conjuntos e conflitos. A arquitetura de **Micro Frontends** propõe dividir o frontend em partes menores e independentes, que podem ser desenvolvidas, compiladas e publicadas separadamente e combinadas em tempo de execução.
+
+Este repositório demonstra esse conceito da forma mais simples possível:
+
+- um **host** em Spring Boot, que entrega a página principal e uma API REST;
+- um **micro frontend** (`mfe1`), um Web Component em TypeScript compilado de forma independente;
+- o **orquestrador** do Native Federation, que carrega o micro frontend dentro da página do host em tempo de execução.
+
+## 💡 O que é Native Federation?
+
+O [Native Federation](https://native-federation.com) aplica o modelo mental do **Module Federation** (popularizado pelo Webpack) usando apenas **padrões nativos do navegador**: **ES Modules** e **Import Maps**. Com isso, ele não depende de um bundler específico e funciona com qualquer framework (React, Angular, Lit, TypeScript puro…) e com qualquer backend (Java, PHP, .NET, Node…).
+
+Neste projeto usamos:
+
+- **[@softarc/native-federation-esbuild](https://github.com/native-federation/esbuild-adapter)**, o adaptador que compila o micro frontend com o esbuild e gera o `remoteEntry.json`;
+- **[@softarc/native-federation-orchestrator](https://github.com/native-federation/orchestrator)**, o runtime que roda no navegador, lê o manifesto e carrega os módulos remotos.
+
+## 🛠️ Tecnologias
+
+| Camada         | Tecnologia                                |
+| -------------- | ----------------------------------------- |
+| Backend / Host | Java 17, Spring Boot 3, Spring Web, Maven |
+| Micro frontend | TypeScript, Web Components                |
+| Build do MFE   | esbuild + Native Federation (adapter v4)  |
+| Runtime        | Native Federation Orchestrator v4         |
+
+## 🔄 Como funciona
+
+```mermaid
+sequenceDiagram
+    participant B as Navegador
+    participant S as Spring Boot (host)
+    B->>S: GET /index.html
+    S-->>B: Página + manifesto + orquestrador
+    B->>S: GET /mfe1/remoteEntry.json
+    S-->>B: Metadados do micro frontend
+    B->>S: GET /mfe1/component-*.js
+    S-->>B: Módulo ES (registra <meu-componente>)
+    B->>S: GET /api/hello
+    S-->>B: { "mensagem": "Olá do Spring Boot!" }
+```
+
+1. O Spring Boot entrega o `index.html`, que contém o **manifesto** com os micro frontends disponíveis.
+2. O **orquestrador** lê o manifesto e busca o `remoteEntry.json` do `mfe1`.
+3. Ele carrega o módulo exposto (`./component`), que registra o Web Component `<meu-componente>`.
+4. O componente chama a API `/api/hello` do Spring e exibe a resposta.
+
+## 📁 Estrutura
+
+```
+teste-federation/
+├── host/                         # Aplicação Spring Boot
+│   ├── pom.xml
+│   └── src/main/
+│       ├── java/com/exemplo/host/
+│       │   ├── HostApplication.java
+│       │   └── HelloController.java     # GET /api/hello
+│       └── resources/static/
+│           ├── index.html               # Página host + manifesto
+│           ├── js/orchestrator-quickstart.js
+│           └── mfe1/                    # Saída do build do micro frontend
+└── mfe1/                         # Micro frontend
+    ├── src/component.ts          # Web Component <meu-componente>
+    ├── federation.config.mjs     # O que o MFE expõe e compartilha
+    └── build.mjs                 # Build com o adaptador esbuild
+```
+
+## ▶️ Como executar
+
+**Pré-requisitos:** Node.js 20+, Java 17+ e Maven.
+
+```bash
+# 1. Compilar o micro frontend
+cd mfe1
+npm install
+npm run build
+
+# 2. Subir o host Spring Boot
+cd ../host
+mvn spring-boot:run
+```
+
+Acesse **http://localhost:8080**. Deve aparecer a mensagem _“Micro frontend diz: Olá do Spring Boot!”_.
+
+## 🎯 Aprendizados
+
+- Como um micro frontend é **exposto** (`exposes`) e descrito pelo `remoteEntry.json`.
+- Como o **orquestrador** resolve e carrega módulos remotos em tempo de execução.
+- Como um backend tradicional (Spring Boot) pode servir de **host** sem precisar de um framework SPA.
+- Uso de **Web Components** como forma de integrar partes independentes, sem acoplar frameworks.
+
+## 🚀 Próximos passos
+
+- [ ] Servir o `mfe1` em outro servidor/porta e configurar **CORS** no Spring.
+- [ ] Criar um segundo micro frontend (`mfe2`), por exemplo em **React**.
+- [ ] Compartilhar dependências entre micro frontends (`shared` / `singleton`).
+- [ ] Usar o modo **watch** no desenvolvimento.
+- [ ] Substituir o quickstart por um orquestrador customizado (`initFederation`).
+
+## 🔗 Referências
+
+- [Documentação do Native Federation](https://native-federation.com)
+- [Adaptador esbuild](https://github.com/native-federation/esbuild-adapter)
+- [Orquestrador](https://github.com/native-federation/orchestrator)
+- [Playground com exemplos](https://github.com/native-federation/playground)
+
+---
+
+Projeto pessoal de estudo, desenvolvido por [@wahlfernando](https://github.com/wahlfernando).
